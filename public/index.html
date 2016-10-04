@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="nightlife-tracker">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Nightlife Tracking App">
+
+  <title>Nightlife Tracker</title>
+
+  <!-- Bootstrap Core CSS -->
+  <link href="/public/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <script src="https://use.fontawesome.com/bfa2841172.js"></script>
+
+  <!-- Custom CSS -->
+  <link href="/public/css/scrolling-nav.css" rel="stylesheet">
+  <link href="/public/css/main.css" rel="stylesheet">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+</head>
+
+<!-- The #page-top ID is part of the scrolling feature - the data-spy and data-target are part of the built-in Bootstrap scrollspy function -->
+
+<body id="page-top" data-spy="scroll" data-target=".navbar-fixed-top" ng-controller="BarListController as barsCtrl">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation" ng-controller="UserController as user">
+      <div class="container">
+        <div class="navbar-header page-scroll">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand page-scroll" href="#page-top">Nightlife Tracker</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+          <ul class="nav navbar-nav">
+            <!-- Hidden li included to remove active class from about link when scrolled up past about section -->
+            <li class="hidden">
+              <a class="page-scroll" href="#page-top"></a>
+            </li>
+            <li>
+              <a class="page-scroll" href="#searchresults">Bars & Clubs</a>
+            </li>
+            <li ng-show="user.current">
+              <a class="page-scroll" href="#profile">Profile</a>
+            </li>
+            <li ng-hide="user.current">
+              <a class="page-scroll" href="#login">Login</a>
+            </li>
+            <li>
+              <a class="page-scroll" href="#contact">What is this?</a>
+            </li>
+            <li ng-show="user.current">
+              <a class="page-scroll" href="https://nightlife-tracker.herokuapp.com" ng-click="user.logout()">Logout</a>
+            </li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+
+  <!-- Intro Section -->
+  <section id="intro" class="intro-section" ng-controller="UserController as user" ng-hide="user.current">
+    <div class="container">
+      <div class="row intro-text">
+        <div class="col-lg-12">
+          <div class="col-md-9 col-md-offset-3">
+            <h1>Nightlife Tracker</h1>
+            <p>Find the happening spots near you.</p>
+            <p>Start by searching for your neighbourhood/area.</p>
+            
+            <div class="input-group search">
+              <input type="text" class="form-control" placeholder="Search for a city or neighborhood" aria-describedby="basic-addon2" id="search1" ng-model="bars.searchLocation">
+              <span class="input-group-btn">
+                <input class="btn btn-default" type="submit" value="Find bars!" ng-click="barsCtrl.search(bars.searchLocation)" id="search1go">
+              </span>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+    <!-- Bars & Clubs Section -->
+    <section id="searchresults" class="results-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <h2>Bars & Clubs</h2>
+            <p>Remeber to please drink responsibly, and always take transit or a cab!</p>
+           
+            <div class="input-group search">
+              <input type="text" class="form-control" placeholder="Search again..." aria-describedby="basic-addon2" id="search2" ng-model="bars.searchLocation">
+              <span class="input-group-btn">
+                <input class="btn btn-default" type="button" value="Find bars!" ng-click="barsCtrl.search(bars.searchLocation)" id="search2go">
+              </span>
+            </div>
+            <div ng-show="barsCtrl.activeRsvps.length" class="active-rsvps">
+              <span>Tonight's RSVPs: </span>
+              <span class="tag label label-success" ng-repeat="location in barsCtrl.activeRsvps track by $index">
+                {{ location }} 
+                <a ng-click="barsCtrl.remove(location)"><i class="remove glyphicon glyphicon-remove-sign glyphicon-white" ></i></a> 
+              </span>
+            </div>
+          </div>  
+        </div>
+      </div>
+      <div class="row row-flex row-flex-wrap" ng-show="barsCtrl.results.length">
+        
+        <div class="col-sm-6 col-md-3" ng-repeat="result in barsCtrl.results">
+          <div class="thumbnail bar">
+            <a href="{{ result.url }}" target="_blank">
+              <img src="{{ result.image_url }}" class="image">
+            </a>
+            <div class="caption">
+              <a href="{{ result.url }}" target="_blank">
+                <h3 class="bar-name">{{ result.name }}</h3>
+              </a>
+              <p class="snippet">{{ result.snippet_text }}</p>
+              <div class="rsvp-section" ng-class="{'im-going': barsCtrl.activeRsvps.indexOf(result.name) > -1} ">
+                <p class="going">{{ result.count }} going tonight</p>
+              </div>
+              <div class="checkbox" ng-show="barsCtrl.currentUser">
+                <label>
+                  <input type="checkbox" ng-click="barsCtrl.toggleRsvp(result)" ng-checked="barsCtrl.activeRsvps.indexOf(result.name) > -1"> RSVP for tonight!
+                </label>
+              </div>
+              <p ng-hide="barsCtrl.currentUser"><a href="#login" class="page-scroll">Log in to rsvp</a></p>
+            </div><!-- /caption -->
+          </div><!-- /thumbnail -->
+        </div><!-- /bar -->
+
+      </div>
+    </section>
+    
+    <!-- Profile Section -->
+    <section id="profile" class="profile-section" ng-show="user.current" ng-controller="UserController as user">
+      <h2>Profile</h2>
+      <img src="{{ user.current.avatar }}" class="profile-avatar">
+      <h3 class="profile-name">{{ user.current.username }}</h3>
+      <p>{{ user.current.socialSource }} user</p>
+      <div ng-controller="rsvpHistoryController as rsvp">
+        <div class="barlist" ng-show="rsvp.barHistory">
+          <h3>Bar RSVP History</h3>
+          <p>This list includes only RSVPs you made more than 24 hours ago. No one can see this list but you.</p>
+          <table> 
+            <tr><th>Bar</th><th>Date</th><th></th></tr>
+            <tr ng-repeat="item in rsvp.barHistory track by $index">
+              <td><a href="{{ item.businessUrl }}" target="_blank">{{ item.business }}</a></td>
+              <td>{{ item.createdAt | date: 'medium' }}</td>
+              <td><button type="button" class="btn btn-danger" ng-click="rsvp.remove(item)">Remove</button></td>
+            </tr>
+          </table>
+        </div>
+        <div ng-hide="rsvp.barHistory">
+          <p>You do not have any past RSVPs.</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Login Section -->
+    <section id="login" class="login-section" ng-hide="user.current" ng-controller="UserController as user">
+      <h2>Login</h2>
+      <p>Login using your account on one of these popular sites:</p>
+      <a href="/auth/github" ng-click="user.deleteCookie()" class="btn btn-default btn-transparent login"><i class="fa fa-github"></i><p>Github</p></a>
+      <a href="/auth/twitter" ng-click="user.deleteCookie()" class="btn btn-default btn-transparent login"><i class="fa fa-twitter"></i><p>Twitter</p></a>
+    </section>
+    
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+      <div class="container contact-content">
+        <div class="row">
+          <div class="col-lg-12">
+            <h2>What is this site?</h2>
+          
+          
+          </div>
+        </div>
+      </div>
+      <a href="http://www.yelp.com" class="yelp" target="_blank"><img src="/public/img/yelp.png"></a>
+    </section>
+
+    <!-- jQuery -->
+    <script src="/public/js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/public/js/bootstrap.min.js"></script>
+
+    <!-- Angular -->
+    <script src="/node_modules/angular/angular.js"></script>
+    <script src="/node_modules/angular-cookies/angular-cookies.js"></script>
+
+    <!-- Scrolling Nav JavaScript -->
+    <script src="/public/js/jquery.easing.min.js"></script>
+    <script src="/public/js/scrolling-nav.js"></script>
+    
+    <!-- Nightlife Tracker Javascript -->
+    <script src="/controllers/app.js"></script>
+    
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m);
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    
+    
+    
+    </script>
+</body>
+
+</html>
